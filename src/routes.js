@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import User from './app/models/User';
 
 import UserController from './app/controllers/UserController';
+import SessionsController from './app/controllers/SessionsController';
 
 const routes = new Router();
 
 
 routes.post('/user', UserController.store);
+routes.post('/sessions', SessionsController.store);
 
 /*routes.get('/', async (req, res) => {
   const user = await User.create({
