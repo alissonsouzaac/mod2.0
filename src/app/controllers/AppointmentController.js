@@ -1,9 +1,12 @@
 import Appointment from '../models/Appointment';
-import { startOfHour, parseISO, isBefore} from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import User from '../models/User';
 import File from '../models/File';
 import * as Yup from 'yup';
 import Notification from '../schemas/notification';
+import { UniqueConstraintError } from 'sequelize';
+import { date } from 'yup/lib/locale';
 
 class AppointmentController {
   async index(req, res) {
@@ -91,13 +94,42 @@ class AppointmentController {
 
       //notificação prestador de serviço
 
+      const user = await UniqueConstraintError.findByPk(req.userId);
+      const formattedDate = format(
+        hourStart,
+        "'dia' dd 'de' MMMM', ás' H:mm'h'",
+        { locale: pt }
+        )
+
       await Notification.create({
-        content: 'Novo agendamento de ... para ...',
+        content: `Novo agendamento de ${user.name} para ${formattedDate} `,
         user: provider_id,
-      })
+      });
 
 
     return res.json();
+  }
+
+  async delete(req, res) {
+    const appointment = await Appointment.findByPk(req.params.id);
+
+    if(appointment.user_id != req.userId) {
+      return res.status(401).json({
+        error: "you don't have permission to cancel this appointment.",
+      });
+    }
+
+    const dateWithSub = subHours(appointment.date, 2);
+
+    if (isBefore(dateWithSub, new Date())) {
+      return res.status(401).json({ error: 'you can only cancel appointment 2hours in advance'});
+    }
+
+    appointment.canceled_at = new Date();
+
+    await appointment.save();
+
+    return res.json(appointment);
   }
 }
 
