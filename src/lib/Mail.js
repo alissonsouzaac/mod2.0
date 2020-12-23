@@ -29,7 +29,7 @@ class Mail {
         extname: '.hbs',
       }),
       viewPath,
-      extName
+      extName: '.hbs'
     }))
   }
   sendMail(message) {
