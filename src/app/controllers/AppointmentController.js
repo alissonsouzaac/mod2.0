@@ -94,7 +94,7 @@ class AppointmentController {
 
       //notificação prestador de serviço
 
-      const user = await UniqueConstraintError.findByPk(req.userId);
+      const user = await User.findByPk(req.userId);
       const formattedDate = format(
         hourStart,
         "'dia' dd 'de' MMMM', ás' H:mm'h'",
