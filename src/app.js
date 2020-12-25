@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import express from 'express';
 import path from 'path';
 import youch from 'youch';
@@ -35,10 +37,14 @@ class App {
 
     exceptionHandler() {
       this.server.use(async (err, req, res, next) => {
+        if(process.env.NODE_ENV == 'development'){
           //Recebendo 4 parametros já fica entendido que é um middleware de tratamento de erro
         const errors = await new youch(err, req).toJSON();
 
         return res.status(500).json(errors);
+      }
+
+      return res.status(500).json({ error: 'Internal server error'});
       });
     }
 }
